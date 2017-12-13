@@ -3,14 +3,13 @@
 // With help from the following examples:
 // https://exec64.co.uk/blog/websockets_with_redux/
 // https://github.com/quirinpa/redux-socket
-
+import 'babel-polyfill';
 import bsock from 'bsock';
 import assert from 'assert';
 
 export default function bsockMiddleware (options) {
   let socket = null;
-  const { debug } = options;
-
+  const { listeners, debug } = options;
   return ({ dispatch }) => next => async (action) => {
     // check if action has a bsock property
     if (!action.bsock)
@@ -18,13 +17,16 @@ export default function bsockMiddleware (options) {
 
     switch (action.type) {
       case 'CONNECT': {
+        if (debug)
+          console.log('Connecting bsock client');
         // Start a new connection to the server
         if(socket !== null) {
           socket.close();
         }
         // if it has a `connect` action then we connect to the bcoin socket
-        const { port, host, ssl, protocols, listeners } = action.bsock;
-        socket = bsock.connect(port, host, ssl, protocols);
+        const { port, host, ssl, protocols } = action.bsock;
+        const socketArgs = [port, host, ssl, protocols];
+        socket = bsock.connect(...socketArgs);
 
         socket.on('error', (err) => {
           if (debug)
@@ -34,27 +36,33 @@ export default function bsockMiddleware (options) {
 
         socket.on('connect', () => {
           // setup the listeners
-          listeners.forEach((listener) => {
-            const { event, actionType, ack } = listener;
-            assert(typeof event === 'string',
-              'Event listener was not a string');
-            assert(actionType && (typeof actionType === 'string'),
-              'Need an action type to create the action');
+          if (listeners && listeners.length) {
+            listeners.forEach((listener) => {
+              const { event, actionType, ack } = listener;
 
-            if (ack) {
-              // for listeners that need to acknowledge, use `bsock.hook`
-              socket.hook(event, async (payload) => {
-                if (payload) {
-                  dispatch({ type: actionType, payload});
-                }
-                return Buffer.from(ack);
-              });
-            } else {
-              socket.bind(event, payload =>
-                dispatch({ type: actionType, payload })
-              );
-            }
-          });
+              assert(typeof event === 'string',
+                'Event listener was not a string');
+              // actionType is required to dispatch the action when msg received
+              assert(actionType && (typeof actionType === 'string'),
+                'Need an action type to create the action');
+
+              if (ack) {
+                // for listeners that need to acknowledge, use `bsock.hook`
+                socket.hook(event, async (payload) => {
+                  if (payload) {
+                    dispatch({ type: actionType, payload});
+                  }
+                  return Buffer.from(ack);
+                });
+              } else {
+                if (debug)
+                  console.log('binding event listener:', event);
+                socket.bind(event, payload =>
+                  dispatch({ type: actionType, payload })
+                );
+              }
+            });
+          }
         });
 
         break;
