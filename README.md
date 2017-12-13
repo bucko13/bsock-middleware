@@ -1,6 +1,23 @@
 # bsock-middleware
 This package is a redux middleware implementation for websocket actions using the bsock client.
 
+**QUICK START**
+
+`npm install --save bsock-middleware`
+
+```javascript
+import { createStore, applyMiddleware } from 'redux';
+import thunkMiddleware from 'redux-thunk';
+import bsockMiddleware from 'bsock-middleware';
+
+import rootReducer from './reducers';
+
+export default function configureStore(initialState) {
+  return createStore(rootReducer, initialState,
+    applyMiddleware(thunkMiddleware, bsockMiddleware)
+  )
+}
+```
 ## What is bsock?
 bsock is a minimal websocket-only implementation of the socket.io protocol, complete with ES6/ES7 features. It is extremely performant and lightweight. It is also compatible with the socket.io api so this can be used to communicate with a socket.io server if necessary. More information on bsock, see the official [repo on GitHub](https://github.com/bcoin-org/bsock)
 

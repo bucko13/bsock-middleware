@@ -52,7 +52,9 @@ export default function bsockMiddleware(options) {
 
                   socket.on('error', function (err) {
                     if (debug) console.log('There was an error with bsock: ', err);
-                    dispatch({ type: 'SOCKET_ERROR', payload: err });
+                    dispatch(function () {
+                      return { type: 'SOCKET_ERROR', payload: err };
+                    });
                   });
 
                   socket.on('connect', function () {
@@ -77,7 +79,9 @@ export default function bsockMiddleware(options) {
                                   switch (_context.prev = _context.next) {
                                     case 0:
                                       if (payload) {
-                                        dispatch({ type: actionType, payload: payload });
+                                        dispatch(function () {
+                                          return { type: actionType, payload: payload };
+                                        });
                                       }
                                       return _context.abrupt('return', Buffer.from(ack));
 
@@ -96,7 +100,9 @@ export default function bsockMiddleware(options) {
                         } else {
                           if (debug) console.log('binding event listener:', event);
                           socket.bind(event, function (payload) {
-                            return dispatch({ type: actionType, payload: payload });
+                            return dispatch(function () {
+                              return { type: actionType, payload: payload };
+                            });
                           });
                         }
                       });
@@ -110,7 +116,9 @@ export default function bsockMiddleware(options) {
 
                   socket = null;
 
-                  dispatch({ type: 'SOCKET_DISCONNECTED' });
+                  dispatch(function () {
+                    return { type: 'SOCKET_DISCONNECTED' };
+                  });
                   return _context2.abrupt('break', 37);
 
                 case 16:
