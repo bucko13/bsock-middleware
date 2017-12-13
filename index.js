@@ -2,7 +2,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 /* eslint-disable consistent-return */
 
-// With help from the following examples:
+// With help from the following:
 // https://exec64.co.uk/blog/websockets_with_redux/
 // https://github.com/quirinpa/redux-socket
 import 'babel-polyfill';
@@ -21,7 +21,7 @@ export default function bsockMiddleware(options) {
     return function (next) {
       return function () {
         var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(action) {
-          var _action$bsock, port, host, ssl, protocols, _action$bsock2, type, message, acknowledge, ack, _action$bsock3, _type, _message;
+          var _action$bsock, port, host, ssl, protocols, _action$bsock2, type, message, acknowledge, ack;
 
           return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
@@ -36,7 +36,7 @@ export default function bsockMiddleware(options) {
 
                 case 2:
                   _context2.t0 = action.type;
-                  _context2.next = _context2.t0 === 'CONNECT' ? 5 : _context2.t0 === 'DISCONNECT' ? 12 : _context2.t0 === 'CALL' ? 16 : _context2.t0 === 'FIRE' ? 32 : 34;
+                  _context2.next = _context2.t0 === 'CONNECT_SOCKET' ? 5 : _context2.t0 === 'DISCONNECT_SOCKET' ? 12 : _context2.t0 === 'EMIT_SOCKET' ? 16 : 36;
                   break;
 
                 case 5:
@@ -52,7 +52,7 @@ export default function bsockMiddleware(options) {
 
                   socket.on('error', function (err) {
                     if (debug) console.log('There was an error with bsock: ', err);
-                    dispatch({ type: 'BSOCK_ERROR', payload: err });
+                    dispatch({ type: 'SOCKET_ERROR', payload: err });
                   });
 
                   socket.on('connect', function () {
@@ -103,76 +103,73 @@ export default function bsockMiddleware(options) {
                     }
                   });
 
-                  return _context2.abrupt('break', 35);
+                  return _context2.abrupt('break', 37);
 
                 case 12:
                   if (socket !== null) socket.close();
 
                   socket = null;
 
-                  dispatch({ type: 'BSOCK_DISCONNECT' });
-                  return _context2.abrupt('break', 35);
+                  dispatch({ type: 'SOCKET_DISCONNECTED' });
+                  return _context2.abrupt('break', 37);
 
                 case 16:
-                  // then get the type and message to send from action props and emit
-                  _action$bsock2 = action.bsock, type = _action$bsock2.type, message = _action$bsock2.message, acknowledge = _action$bsock2.acknowledge;
-
-                  if (!(socket !== null)) {
-                    _context2.next = 30;
+                  if (!(socket === null)) {
+                    _context2.next = 19;
                     break;
                   }
 
-                  _context2.prev = 18;
-                  _context2.next = 21;
+                  console.log('Please connect bsock before trying to call server');
+                  return _context2.abrupt('return', next(action));
+
+                case 19:
+                  _action$bsock2 = action.bsock, type = _action$bsock2.type, message = _action$bsock2.message, acknowledge = _action$bsock2.acknowledge;
+                  _context2.prev = 20;
+
+                  if (!acknowledge) {
+                    _context2.next = 29;
+                    break;
+                  }
+
+                  assert(typeof acknowledge === 'function', 'acknowledge property must be a function');
+                  _context2.next = 25;
                   return socket.call(type, message);
 
-                case 21:
+                case 25:
                   ack = _context2.sent;
 
                   if (ack) {
                     dispatch(acknowledge(ack));
                   }
-                  _context2.next = 28;
+                  _context2.next = 30;
                   break;
 
-                case 25:
-                  _context2.prev = 25;
-                  _context2.t1 = _context2['catch'](18);
+                case 29:
+                  // if there's no acknowledge function then just use the fire method
+                  socket.fire(type, message);
+
+                case 30:
+                  _context2.next = 35;
+                  break;
+
+                case 32:
+                  _context2.prev = 32;
+                  _context2.t1 = _context2['catch'](20);
 
                   if (debug) console.log('There was a problem calling the socket:', _context2.t1);
 
-                case 28:
-                  _context2.next = 31;
-                  break;
+                case 35:
+                  return _context2.abrupt('break', 37);
 
-                case 30:
-                  if (debug) {
-                    console.log('Please connect bsock before trying to call server');
-                  }
-
-                case 31:
-                  return _context2.abrupt('break', 35);
-
-                case 32:
-                  if (socket !== null) {
-                    _action$bsock3 = action.bsock, _type = _action$bsock3.type, _message = _action$bsock3.message;
-
-                    socket.fire(_type, _message);
-                  } else if (debug) {
-                    console.log('Please connect bsock before trying to fire a message');
-                  }
-
-                  return _context2.abrupt('break', 35);
-
-                case 34:
+                case 36:
                   return _context2.abrupt('return', next(action));
 
-                case 35:
+                case 37:
                 case 'end':
                   return _context2.stop();
               }
             }
-          }, _callee2, _this, [[18, 25]]);
+          }, _callee2, _this, [[20, 32]]);
         }));
 
         return function (_x) {

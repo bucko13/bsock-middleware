@@ -16,7 +16,7 @@ export default function bsockMiddleware (options) {
       return next(action);
 
     switch (action.type) {
-      case 'CONNECT': {
+      case 'CONNECT_SOCKET': {
         if (debug)
           console.log('Connecting bsock client');
         // Start a new connection to the server
@@ -30,7 +30,7 @@ export default function bsockMiddleware (options) {
         socket.on('error', (err) => {
           if (debug)
             console.log('There was an error with bsock: ', err);
-          dispatch({ type: 'SOCKET_ERROR', payload: err });
+          dispatch(() => ({ type: 'SOCKET_ERROR', payload: err }));
         });
 
         socket.on('connect', () => {
@@ -49,7 +49,7 @@ export default function bsockMiddleware (options) {
                 // for listeners that need to acknowledge, use `bsock.hook`
                 socket.hook(event, async (payload) => {
                   if (payload) {
-                    dispatch({ type: actionType, payload});
+                    dispatch(() => ({ type: actionType, payload}));
                   }
                   return Buffer.from(ack);
                 });
@@ -57,7 +57,7 @@ export default function bsockMiddleware (options) {
                 if (debug)
                   console.log('binding event listener:', event);
                 socket.bind(event, payload =>
-                  dispatch({ type: actionType, payload })
+                  dispatch(() => ({ type: actionType, payload }))
                 );
               }
             });
@@ -67,44 +67,40 @@ export default function bsockMiddleware (options) {
         break;
       }
 
-      case 'DISCONNECT': {
+      case 'DISCONNECT_SOCKET': {
         if (socket !== null)
           socket.close();
 
         socket = null;
 
-        dispatch({ type: 'BSOCK_DISCONNECT' });
+        dispatch(() => ({ type: 'SOCKET_DISCONNECTED' }));
         break;
       }
 
-      // A CALL in bsock expects an acknowledgement
-      case 'CALL': {
-        // then get the type and message to send from action props and emit
+      case 'EMIT_SOCKET': {
+        if (socket === null) {
+            console.log('Please connect bsock before trying to call server');
+            return next(action);
+        }
+
         const { type, message, acknowledge } = action.bsock;
 
-        if (socket !== null) {
-          try {
+        try {
+          if (acknowledge) {
+            assert(typeof acknowledge === 'function',
+              'acknowledge property must be a function'
+            );
             const ack = await socket.call(type, message);
             if (ack) {
               dispatch(acknowledge(ack));
             }
-          } catch(error) {
-            if (debug)
-              console.log('There was a problem calling the socket:', error);
+          } else {
+            // if there's no acknowledge function then just use the fire method
+            socket.fire(type, message);
           }
-        } else if (debug) {
-            console.log('Please connect bsock before trying to call server');
-        }
-
-        break;
-      }
-
-      case 'FIRE': {
-        if (socket !== null) {
-          const { type, message } = action.bsock;
-          socket.fire(type, message);
-        } else if (debug) {
-          console.log('Please connect bsock before trying to fire a message');
+        } catch(error) {
+          if (debug)
+            console.log('There was a problem calling the socket:', error);
         }
 
         break;
