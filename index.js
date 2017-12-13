@@ -21,7 +21,7 @@ export default function bsockMiddleware(options) {
     return function (next) {
       return function () {
         var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(action) {
-          var _action$bsock, port, host, ssl, protocols, socketArgs, _action$bsock2, type, message, acknowledge, ack, _action$bsock3, _type, _message;
+          var _action$bsock, port, host, ssl, protocols, _action$bsock2, type, message, acknowledge, ack, _action$bsock3, _type, _message;
 
           return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
@@ -36,7 +36,7 @@ export default function bsockMiddleware(options) {
 
                 case 2:
                   _context2.t0 = action.type;
-                  _context2.next = _context2.t0 === 'CONNECT' ? 5 : _context2.t0 === 'DISCONNECT' ? 13 : _context2.t0 === 'CALL' ? 17 : _context2.t0 === 'FIRE' ? 33 : 35;
+                  _context2.next = _context2.t0 === 'CONNECT' ? 5 : _context2.t0 === 'DISCONNECT' ? 12 : _context2.t0 === 'CALL' ? 16 : _context2.t0 === 'FIRE' ? 32 : 34;
                   break;
 
                 case 5:
@@ -47,9 +47,8 @@ export default function bsockMiddleware(options) {
                   }
                   // if it has a `connect` action then we connect to the bcoin socket
                   _action$bsock = action.bsock, port = _action$bsock.port, host = _action$bsock.host, ssl = _action$bsock.ssl, protocols = _action$bsock.protocols;
-                  socketArgs = [port, host, ssl, protocols];
 
-                  socket = bsock.connect.apply(bsock, socketArgs);
+                  socket = bsock.connect(port, host, ssl, protocols);
 
                   socket.on('error', function (err) {
                     if (debug) console.log('There was an error with bsock: ', err);
@@ -60,7 +59,6 @@ export default function bsockMiddleware(options) {
                     // setup the listeners
                     if (listeners && listeners.length) {
                       listeners.forEach(function (listener) {
-                        console.log('listener: ', listener);
                         var event = listener.event,
                             actionType = listener.actionType,
                             ack = listener.ack;
@@ -105,57 +103,57 @@ export default function bsockMiddleware(options) {
                     }
                   });
 
-                  return _context2.abrupt('break', 36);
+                  return _context2.abrupt('break', 35);
 
-                case 13:
+                case 12:
                   if (socket !== null) socket.close();
 
                   socket = null;
 
                   dispatch({ type: 'BSOCK_DISCONNECT' });
-                  return _context2.abrupt('break', 36);
+                  return _context2.abrupt('break', 35);
 
-                case 17:
+                case 16:
                   // then get the type and message to send from action props and emit
                   _action$bsock2 = action.bsock, type = _action$bsock2.type, message = _action$bsock2.message, acknowledge = _action$bsock2.acknowledge;
 
                   if (!(socket !== null)) {
-                    _context2.next = 31;
+                    _context2.next = 30;
                     break;
                   }
 
-                  _context2.prev = 19;
-                  _context2.next = 22;
+                  _context2.prev = 18;
+                  _context2.next = 21;
                   return socket.call(type, message);
 
-                case 22:
+                case 21:
                   ack = _context2.sent;
 
                   if (ack) {
                     dispatch(acknowledge(ack));
                   }
-                  _context2.next = 29;
+                  _context2.next = 28;
                   break;
 
-                case 26:
-                  _context2.prev = 26;
-                  _context2.t1 = _context2['catch'](19);
+                case 25:
+                  _context2.prev = 25;
+                  _context2.t1 = _context2['catch'](18);
 
                   if (debug) console.log('There was a problem calling the socket:', _context2.t1);
 
-                case 29:
-                  _context2.next = 32;
+                case 28:
+                  _context2.next = 31;
                   break;
 
-                case 31:
+                case 30:
                   if (debug) {
                     console.log('Please connect bsock before trying to call server');
                   }
 
-                case 32:
-                  return _context2.abrupt('break', 36);
+                case 31:
+                  return _context2.abrupt('break', 35);
 
-                case 33:
+                case 32:
                   if (socket !== null) {
                     _action$bsock3 = action.bsock, _type = _action$bsock3.type, _message = _action$bsock3.message;
 
@@ -164,17 +162,17 @@ export default function bsockMiddleware(options) {
                     console.log('Please connect bsock before trying to fire a message');
                   }
 
-                  return _context2.abrupt('break', 36);
+                  return _context2.abrupt('break', 35);
 
-                case 35:
+                case 34:
                   return _context2.abrupt('return', next(action));
 
-                case 36:
+                case 35:
                 case 'end':
                   return _context2.stop();
               }
             }
-          }, _callee2, _this, [[19, 26]]);
+          }, _callee2, _this, [[18, 25]]);
         }));
 
         return function (_x) {

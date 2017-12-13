@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 
-// With help from the following examples:
+// With help from the following:
 // https://exec64.co.uk/blog/websockets_with_redux/
 // https://github.com/quirinpa/redux-socket
 import 'babel-polyfill';
@@ -25,13 +25,12 @@ export default function bsockMiddleware (options) {
         }
         // if it has a `connect` action then we connect to the bcoin socket
         const { port, host, ssl, protocols } = action.bsock;
-        const socketArgs = [port, host, ssl, protocols];
-        socket = bsock.connect(...socketArgs);
+        socket = bsock.connect(port, host, ssl, protocols);
 
         socket.on('error', (err) => {
           if (debug)
             console.log('There was an error with bsock: ', err);
-          dispatch({ type: 'BSOCK_ERROR', payload: err });
+          dispatch({ type: 'SOCKET_ERROR', payload: err });
         });
 
         socket.on('connect', () => {
@@ -95,7 +94,7 @@ export default function bsockMiddleware (options) {
           }
         } else if (debug) {
             console.log('Please connect bsock before trying to call server');
-          }
+        }
 
         break;
       }
