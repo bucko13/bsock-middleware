@@ -58,6 +58,7 @@ export default function bsockMiddleware(options) {
                   });
 
                   socket.on('connect', function () {
+                    if (debug) console.log('bsock client connected');
                     // setup the listeners
                     if (listeners && listeners.length) {
                       listeners.forEach(function (listener) {
