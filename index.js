@@ -1,5 +1,3 @@
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable consistent-return */
@@ -97,7 +95,7 @@ export default function bsockMiddleware(options) {
                             };
                           }());
                         } else {
-                          if (debug) console.log('dispatch: ', typeof dispatch === 'undefined' ? 'undefined' : _typeof(dispatch));
+                          if (debug) console.log('binding event: ', event);
                           socket.bind(event, function (payload) {
                             return dispatch({ type: actionType, payload: payload });
                           });

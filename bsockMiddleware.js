@@ -57,7 +57,7 @@ export default function bsockMiddleware (options) {
                 });
               } else {
                 if (debug)
-                  console.log('dispatch: ', typeof dispatch);
+                  console.log('binding event: ', event);
                 socket.bind(event, payload =>
                   dispatch({ type: actionType, payload })
                 );
