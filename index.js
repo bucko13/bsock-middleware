@@ -1,3 +1,5 @@
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable consistent-return */
@@ -52,9 +54,7 @@ export default function bsockMiddleware(options) {
 
                   socket.on('error', function (err) {
                     if (debug) console.log('There was an error with bsock: ', err);
-                    dispatch(function () {
-                      return { type: 'SOCKET_ERROR', payload: err };
-                    });
+                    dispatch({ type: 'SOCKET_ERROR', payload: err });
                   });
 
                   socket.on('connect', function () {
@@ -80,9 +80,7 @@ export default function bsockMiddleware(options) {
                                   switch (_context.prev = _context.next) {
                                     case 0:
                                       if (payload) {
-                                        dispatch(function () {
-                                          return { type: actionType, payload: payload };
-                                        });
+                                        dispatch({ type: actionType, payload: payload });
                                       }
                                       return _context.abrupt('return', Buffer.from(ack));
 
@@ -99,11 +97,9 @@ export default function bsockMiddleware(options) {
                             };
                           }());
                         } else {
-                          if (debug) console.log('binding event listener:', event);
+                          if (debug) console.log('dispatch: ', typeof dispatch === 'undefined' ? 'undefined' : _typeof(dispatch));
                           socket.bind(event, function (payload) {
-                            return dispatch(function () {
-                              return { type: actionType, payload: payload };
-                            });
+                            return dispatch({ type: actionType, payload: payload });
                           });
                         }
                       });
@@ -117,9 +113,7 @@ export default function bsockMiddleware(options) {
 
                   socket = null;
 
-                  dispatch(function () {
-                    return { type: 'SOCKET_DISCONNECTED' };
-                  });
+                  dispatch({ type: 'SOCKET_DISCONNECTED' });
                   return _context2.abrupt('break', 37);
 
                 case 16:

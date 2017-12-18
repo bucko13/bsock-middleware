@@ -30,7 +30,7 @@ export default function bsockMiddleware (options) {
         socket.on('error', (err) => {
           if (debug)
             console.log('There was an error with bsock: ', err);
-          dispatch(() => ({ type: 'SOCKET_ERROR', payload: err }));
+          dispatch({ type: 'SOCKET_ERROR', payload: err });
         });
 
         socket.on('connect', () => {
@@ -51,15 +51,15 @@ export default function bsockMiddleware (options) {
                 // for listeners that need to acknowledge, use `bsock.hook`
                 socket.hook(event, async (payload) => {
                   if (payload) {
-                    dispatch(() => ({ type: actionType, payload}));
+                    dispatch({ type: actionType, payload});
                   }
                   return Buffer.from(ack);
                 });
               } else {
                 if (debug)
-                  console.log('binding event listener:', event);
+                  console.log('dispatch: ', typeof dispatch);
                 socket.bind(event, payload =>
-                  dispatch(() => ({ type: actionType, payload }))
+                  dispatch({ type: actionType, payload })
                 );
               }
             });
@@ -75,7 +75,7 @@ export default function bsockMiddleware (options) {
 
         socket = null;
 
-        dispatch(() => ({ type: 'SOCKET_DISCONNECTED' }));
+        dispatch({ type: 'SOCKET_DISCONNECTED' });
         break;
       }
 
