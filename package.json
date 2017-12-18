@@ -1,6 +1,6 @@
 {
   "name": "bsock-middleware",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "redux middleware for websocket actions using the bsock client",
   "main": "index.js",
   "scripts": {
