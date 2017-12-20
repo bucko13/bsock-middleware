@@ -1,3 +1,7 @@
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable consistent-return */
@@ -65,8 +69,8 @@ export default function bsockMiddleware(options) {
                       listeners.forEach(function (listener) {
                         var event = listener.event,
                             actionType = listener.actionType,
-                            ack = listener.ack;
-
+                            ack = listener.ack,
+                            rest = _objectWithoutProperties(listener, ['event', 'actionType', 'ack']);
 
                         assert(typeof event === 'string', 'Event listener was not a string');
                         // actionType is required to dispatch the action when msg received
@@ -100,7 +104,7 @@ export default function bsockMiddleware(options) {
                         } else {
                           if (debug) console.log('binding event: ', event);
                           socket.bind(event, function (payload) {
-                            return dispatch({ type: actionType, payload: payload });
+                            return dispatch({ type: actionType, payload: _extends({}, payload, rest) });
                           });
                         }
                       });
