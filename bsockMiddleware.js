@@ -9,7 +9,7 @@ import assert from 'assert';
 
 export default function bsockMiddleware (options) {
   let socket = null;
-  const { listeners, debug } = options;
+  const { listeners, debug, disconnectedAction } = options;
   return ({ dispatch }) => next => async (action) => {
     // check if action has a bsock property
     if (!action.bsock)
@@ -30,12 +30,15 @@ export default function bsockMiddleware (options) {
         socket.on('error', (err) => {
           if (debug)
             console.log('There was an error with bsock: ', err);
+          if (disconnectedAction)
+            return next(disconnectedAction);
           dispatch({ type: 'SOCKET_ERROR', payload: err });
         });
 
         socket.on('connect', () => {
           if (debug)
             console.log('bsock client connected');
+
           // setup the listeners
           if (listeners && listeners.length) {
             listeners.forEach((listener) => {
@@ -64,6 +67,10 @@ export default function bsockMiddleware (options) {
               }
             });
           }
+
+          dispatch({
+            type: 'SOCKET_CONNECTED'
+          });
         });
 
         break;
@@ -74,6 +81,8 @@ export default function bsockMiddleware (options) {
           socket.close();
 
         socket = null;
+        if (disconnectedAction)
+          return next(disconnectedAction);
 
         dispatch({ type: 'SOCKET_DISCONNECTED' });
         break;

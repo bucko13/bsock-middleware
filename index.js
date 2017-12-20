@@ -14,7 +14,8 @@ export default function bsockMiddleware(options) {
 
   var socket = null;
   var listeners = options.listeners,
-      debug = options.debug;
+      debug = options.debug,
+      disconnectedAction = options.disconnectedAction;
 
   return function (_ref) {
     var dispatch = _ref.dispatch;
@@ -36,7 +37,7 @@ export default function bsockMiddleware(options) {
 
                 case 2:
                   _context2.t0 = action.type;
-                  _context2.next = _context2.t0 === 'CONNECT_SOCKET' ? 5 : _context2.t0 === 'DISCONNECT_SOCKET' ? 12 : _context2.t0 === 'EMIT_SOCKET' ? 16 : 36;
+                  _context2.next = _context2.t0 === 'CONNECT_SOCKET' ? 5 : _context2.t0 === 'DISCONNECT_SOCKET' ? 12 : _context2.t0 === 'EMIT_SOCKET' ? 18 : 38;
                   break;
 
                 case 5:
@@ -52,11 +53,13 @@ export default function bsockMiddleware(options) {
 
                   socket.on('error', function (err) {
                     if (debug) console.log('There was an error with bsock: ', err);
+                    if (disconnectedAction) return next(disconnectedAction);
                     dispatch({ type: 'SOCKET_ERROR', payload: err });
                   });
 
                   socket.on('connect', function () {
                     if (debug) console.log('bsock client connected');
+
                     // setup the listeners
                     if (listeners && listeners.length) {
                       listeners.forEach(function (listener) {
@@ -102,75 +105,88 @@ export default function bsockMiddleware(options) {
                         }
                       });
                     }
+
+                    dispatch({
+                      type: 'SOCKET_CONNECTED'
+                    });
                   });
 
-                  return _context2.abrupt('break', 37);
+                  return _context2.abrupt('break', 39);
 
                 case 12:
                   if (socket !== null) socket.close();
 
                   socket = null;
 
-                  dispatch({ type: 'SOCKET_DISCONNECTED' });
-                  return _context2.abrupt('break', 37);
+                  if (!disconnectedAction) {
+                    _context2.next = 16;
+                    break;
+                  }
+
+                  return _context2.abrupt('return', next(disconnectedAction));
 
                 case 16:
+
+                  dispatch({ type: 'SOCKET_DISCONNECTED' });
+                  return _context2.abrupt('break', 39);
+
+                case 18:
                   if (!(socket === null)) {
-                    _context2.next = 19;
+                    _context2.next = 21;
                     break;
                   }
 
                   console.log('Please connect bsock before trying to call server');
                   return _context2.abrupt('return', next(action));
 
-                case 19:
+                case 21:
                   _action$bsock2 = action.bsock, type = _action$bsock2.type, message = _action$bsock2.message, acknowledge = _action$bsock2.acknowledge;
-                  _context2.prev = 20;
+                  _context2.prev = 22;
 
                   if (!acknowledge) {
-                    _context2.next = 29;
+                    _context2.next = 31;
                     break;
                   }
 
                   assert(typeof acknowledge === 'function', 'acknowledge property must be a function');
-                  _context2.next = 25;
+                  _context2.next = 27;
                   return socket.call(type, message);
 
-                case 25:
+                case 27:
                   ack = _context2.sent;
 
                   if (ack) {
                     dispatch(acknowledge(ack));
                   }
-                  _context2.next = 30;
+                  _context2.next = 32;
                   break;
 
-                case 29:
+                case 31:
                   // if there's no acknowledge function then just use the fire method
                   socket.fire(type, message);
 
-                case 30:
-                  _context2.next = 35;
+                case 32:
+                  _context2.next = 37;
                   break;
 
-                case 32:
-                  _context2.prev = 32;
-                  _context2.t1 = _context2['catch'](20);
+                case 34:
+                  _context2.prev = 34;
+                  _context2.t1 = _context2['catch'](22);
 
                   if (debug) console.log('There was a problem calling the socket:', _context2.t1);
 
-                case 35:
-                  return _context2.abrupt('break', 37);
+                case 37:
+                  return _context2.abrupt('break', 39);
 
-                case 36:
+                case 38:
                   return _context2.abrupt('return', next(action));
 
-                case 37:
+                case 39:
                 case 'end':
                   return _context2.stop();
               }
             }
-          }, _callee2, _this, [[20, 32]]);
+          }, _callee2, _this, [[22, 34]]);
         }));
 
         return function (_x) {
