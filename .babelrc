@@ -1,16 +1,13 @@
 {
   "presets": [
-    [
-      "env", {
-          "targets": {
-            "browsers": ["last 2 versions"]
-          },
-          "modules": false,
-          "useBuiltins": "usage",
-          "loose": true
-        },
-      "transform-object-rest-spread"
-    ]
+    ["env", {
+      "targets": {
+        "browsers": ["last 2 versions"]
+      },
+      "modules": false,
+      "useBuiltins": "usage",
+      "loose": true
+    }]
   ],
   "plugins": ["transform-object-rest-spread"]
 }
