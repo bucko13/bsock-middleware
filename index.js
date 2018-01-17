@@ -26,7 +26,7 @@ export default function bsockMiddleware(options) {
     return function (next) {
       return function () {
         var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(action) {
-          var _action$bsock, port, host, ssl, protocols, _action$bsock2, type, message, acknowledge, ack;
+          var _action$bsock, port, host, ssl, protocols, _action$bsock2, type, message, acknowledge, rest, args, _socket, ack, _socket2;
 
           return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
@@ -41,7 +41,7 @@ export default function bsockMiddleware(options) {
 
                 case 2:
                   _context2.t0 = action.type;
-                  _context2.next = _context2.t0 === 'CONNECT_SOCKET' ? 5 : _context2.t0 === 'DISCONNECT_SOCKET' ? 12 : _context2.t0 === 'EMIT_SOCKET' ? 18 : 38;
+                  _context2.next = _context2.t0 === 'CONNECT_SOCKET' ? 5 : _context2.t0 === 'DISCONNECT_SOCKET' ? 12 : _context2.t0 === 'EMIT_SOCKET' ? 18 : 41;
                   break;
 
                 case 5:
@@ -115,7 +115,7 @@ export default function bsockMiddleware(options) {
                     });
                   });
 
-                  return _context2.abrupt('break', 39);
+                  return _context2.abrupt('break', 42);
 
                 case 12:
                   if (socket !== null) socket.close();
@@ -132,7 +132,7 @@ export default function bsockMiddleware(options) {
                 case 16:
 
                   dispatch({ type: 'SOCKET_DISCONNECTED' });
-                  return _context2.abrupt('break', 39);
+                  return _context2.abrupt('break', 42);
 
                 case 18:
                   if (!(socket === null)) {
@@ -144,53 +144,62 @@ export default function bsockMiddleware(options) {
                   return _context2.abrupt('return', next(action));
 
                 case 21:
-                  _action$bsock2 = action.bsock, type = _action$bsock2.type, message = _action$bsock2.message, acknowledge = _action$bsock2.acknowledge;
-                  _context2.prev = 22;
+                  _action$bsock2 = action.bsock, type = _action$bsock2.type, message = _action$bsock2.message, acknowledge = _action$bsock2.acknowledge, rest = _objectWithoutProperties(_action$bsock2, ['type', 'message', 'acknowledge']);
+                  args = [];
+
+                  if (Object.keys(rest).length) {
+                    args = Object.keys(rest).map(function (key) {
+                      return rest[key];
+                    });
+                  }
+
+                  _context2.prev = 24;
 
                   if (!acknowledge) {
-                    _context2.next = 31;
+                    _context2.next = 33;
                     break;
                   }
 
                   assert(typeof acknowledge === 'function', 'acknowledge property must be a function');
-                  _context2.next = 27;
-                  return socket.call(type, message);
+                  _context2.next = 29;
+                  return (_socket = socket).call.apply(_socket, [type, message].concat(args));
 
-                case 27:
+                case 29:
                   ack = _context2.sent;
 
                   if (ack) {
                     dispatch(acknowledge(ack));
                   }
-                  _context2.next = 32;
+                  _context2.next = 35;
                   break;
 
-                case 31:
+                case 33:
                   // if there's no acknowledge function then just use the fire method
-                  socket.fire(type, message);
+                  console.log('rest of args to send', args);
+                  (_socket2 = socket).fire.apply(_socket2, [type, message].concat(args));
 
-                case 32:
-                  _context2.next = 37;
+                case 35:
+                  _context2.next = 40;
                   break;
 
-                case 34:
-                  _context2.prev = 34;
-                  _context2.t1 = _context2['catch'](22);
+                case 37:
+                  _context2.prev = 37;
+                  _context2.t1 = _context2['catch'](24);
 
                   if (debug) console.log('There was a problem calling the socket:', _context2.t1);
 
-                case 37:
-                  return _context2.abrupt('break', 39);
+                case 40:
+                  return _context2.abrupt('break', 42);
 
-                case 38:
+                case 41:
                   return _context2.abrupt('return', next(action));
 
-                case 39:
+                case 42:
                 case 'end':
                   return _context2.stop();
               }
             }
-          }, _callee2, _this, [[22, 34]]);
+          }, _callee2, _this, [[24, 37]]);
         }));
 
         return function (_x) {

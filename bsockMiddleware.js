@@ -94,20 +94,25 @@ export default function bsockMiddleware (options) {
             return next(action);
         }
 
-        const { type, message, acknowledge } = action.bsock;
+        const { type, message, acknowledge, ...rest } = action.bsock;
+
+        let args = [];
+        if (Object.keys(rest).length) {
+          args = Object.keys(rest).map(key => rest[key]);
+        }
 
         try {
           if (acknowledge) {
             assert(typeof acknowledge === 'function',
               'acknowledge property must be a function'
             );
-            const ack = await socket.call(type, message);
+            const ack = await socket.call(type, message, ...args);
             if (ack) {
               dispatch(acknowledge(ack));
             }
           } else {
             // if there's no acknowledge function then just use the fire method
-            socket.fire(type, message);
+            socket.fire(type, message, ...args);
           }
         } catch(error) {
           if (debug)
