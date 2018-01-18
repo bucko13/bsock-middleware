@@ -29,7 +29,7 @@ export default function bsockMiddleware (options) {
 
         socket.on('error', (err) => {
           if (debug)
-            console.log('There was an error with bsock: ', err);
+            console.error('There was an error with bsock: ', err);
           if (disconnectedAction)
             return next(disconnectedAction);
           dispatch({ type: 'SOCKET_ERROR', payload: err });
@@ -42,7 +42,7 @@ export default function bsockMiddleware (options) {
           // setup the listeners
           if (listeners && listeners.length) {
             listeners.forEach((listener) => {
-              const { event, actionType, ack, ...rest } = listener;
+              const { event, actionType, ack } = listener;
 
               assert(typeof event === 'string',
                 'Event listener was not a string');
@@ -61,8 +61,8 @@ export default function bsockMiddleware (options) {
               } else {
                 if (debug)
                   console.log('binding event: ', event);
-                socket.bind(event, payload =>
-                  dispatch({ type: actionType, payload: {...payload, ...rest} })
+                socket.bind(event, (...data) =>
+                  dispatch({ type: actionType, payload: data })
                 );
               }
             });
@@ -116,7 +116,7 @@ export default function bsockMiddleware (options) {
           }
         } catch(error) {
           if (debug)
-            console.log('There was a problem calling the socket:', error);
+            console.error('There was a problem calling the socket:', error);
         }
 
         break;

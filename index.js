@@ -1,5 +1,3 @@
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
@@ -41,7 +39,7 @@ export default function bsockMiddleware(options) {
 
                 case 2:
                   _context2.t0 = action.type;
-                  _context2.next = _context2.t0 === 'CONNECT_SOCKET' ? 5 : _context2.t0 === 'DISCONNECT_SOCKET' ? 12 : _context2.t0 === 'EMIT_SOCKET' ? 18 : 41;
+                  _context2.next = _context2.t0 === 'CONNECT_SOCKET' ? 5 : _context2.t0 === 'DISCONNECT_SOCKET' ? 12 : _context2.t0 === 'EMIT_SOCKET' ? 18 : 40;
                   break;
 
                 case 5:
@@ -56,7 +54,7 @@ export default function bsockMiddleware(options) {
                   socket = bsock.connect(port, host, ssl, protocols);
 
                   socket.on('error', function (err) {
-                    if (debug) console.log('There was an error with bsock: ', err);
+                    if (debug) console.error('There was an error with bsock: ', err);
                     if (disconnectedAction) return next(disconnectedAction);
                     dispatch({ type: 'SOCKET_ERROR', payload: err });
                   });
@@ -69,8 +67,8 @@ export default function bsockMiddleware(options) {
                       listeners.forEach(function (listener) {
                         var event = listener.event,
                             actionType = listener.actionType,
-                            ack = listener.ack,
-                            rest = _objectWithoutProperties(listener, ['event', 'actionType', 'ack']);
+                            ack = listener.ack;
+
 
                         assert(typeof event === 'string', 'Event listener was not a string');
                         // actionType is required to dispatch the action when msg received
@@ -103,8 +101,12 @@ export default function bsockMiddleware(options) {
                           }());
                         } else {
                           if (debug) console.log('binding event: ', event);
-                          socket.bind(event, function (payload) {
-                            return dispatch({ type: actionType, payload: _extends({}, payload, rest) });
+                          socket.bind(event, function () {
+                            for (var _len = arguments.length, data = Array(_len), _key = 0; _key < _len; _key++) {
+                              data[_key] = arguments[_key];
+                            }
+
+                            return dispatch({ type: actionType, payload: data });
                           });
                         }
                       });
@@ -115,7 +117,7 @@ export default function bsockMiddleware(options) {
                     });
                   });
 
-                  return _context2.abrupt('break', 42);
+                  return _context2.abrupt('break', 41);
 
                 case 12:
                   if (socket !== null) socket.close();
@@ -132,7 +134,7 @@ export default function bsockMiddleware(options) {
                 case 16:
 
                   dispatch({ type: 'SOCKET_DISCONNECTED' });
-                  return _context2.abrupt('break', 42);
+                  return _context2.abrupt('break', 41);
 
                 case 18:
                   if (!(socket === null)) {
@@ -170,36 +172,35 @@ export default function bsockMiddleware(options) {
                   if (ack) {
                     dispatch(acknowledge(ack));
                   }
-                  _context2.next = 35;
+                  _context2.next = 34;
                   break;
 
                 case 33:
                   // if there's no acknowledge function then just use the fire method
-                  console.log('rest of args to send', args);
                   (_socket2 = socket).fire.apply(_socket2, [type, message].concat(args));
 
-                case 35:
-                  _context2.next = 40;
+                case 34:
+                  _context2.next = 39;
                   break;
 
-                case 37:
-                  _context2.prev = 37;
+                case 36:
+                  _context2.prev = 36;
                   _context2.t1 = _context2['catch'](24);
 
-                  if (debug) console.log('There was a problem calling the socket:', _context2.t1);
+                  if (debug) console.error('There was a problem calling the socket:', _context2.t1);
+
+                case 39:
+                  return _context2.abrupt('break', 41);
 
                 case 40:
-                  return _context2.abrupt('break', 42);
-
-                case 41:
                   return _context2.abrupt('return', next(action));
 
-                case 42:
+                case 41:
                 case 'end':
                   return _context2.stop();
               }
             }
-          }, _callee2, _this, [[24, 37]]);
+          }, _callee2, _this, [[24, 36]]);
         }));
 
         return function (_x) {
