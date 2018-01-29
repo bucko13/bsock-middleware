@@ -170,7 +170,7 @@ export default function bsockMiddleware(options) {
                   ack = _context2.sent;
 
                   if (ack) {
-                    dispatch(acknowledge(ack));
+                    acknowledge(ack);
                   }
                   _context2.next = 34;
                   break;

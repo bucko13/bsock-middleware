@@ -108,7 +108,7 @@ export default function bsockMiddleware (options) {
             );
             const ack = await socket.call(type, message, ...args);
             if (ack) {
-              dispatch(acknowledge(ack));
+              acknowledge(ack);
             }
           } else {
             // if there's no acknowledge function then just use the fire method
