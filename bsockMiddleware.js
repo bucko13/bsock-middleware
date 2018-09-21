@@ -24,8 +24,8 @@ export default function bsockMiddleware (options) {
           socket.close();
         }
         // if it has a `connect` action then we connect to the bcoin socket
-        const { port, host, ssl, protocols } = action.bsock;
-        socket = bsock.connect(port, host, ssl, protocols);
+        const { port, host, ssl, protocols, namespace } = action.bsock;
+        socket = bsock.connect(port, host, ssl, protocols, namespace);
 
         socket.on('error', (err) => {
           if (debug)
