@@ -57,3 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
+# system files
+.DS_Store
+
+# project files
+index.js

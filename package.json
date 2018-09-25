@@ -22,17 +22,17 @@
   "author": "Buck Perley",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Bucko13/bsock-middleware/issues"
+    "url": "https://github.com/bucko13/bsock-middleware/issues"
   },
-  "homepage": "https://github.com/Bucko13/bsock-middleware#readme",
+  "homepage": "https://github.com/bucko13/bsock-middleware#readme",
   "dependencies": {
     "babel-polyfill": "^6.26.0",
-    "bsock": "git+https://github.com/bcoin-org/bsock"
+    "bsock": "github:bucko13/bsock#paths"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "eslint": "^4.13.1"
   }
 }

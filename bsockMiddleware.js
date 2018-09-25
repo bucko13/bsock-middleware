@@ -24,8 +24,8 @@ export default function bsockMiddleware (options) {
           socket.close();
         }
         // if it has a `connect` action then we connect to the bcoin socket
-        const { port, host, ssl, protocols } = action.bsock;
-        socket = bsock.connect(port, host, ssl, protocols);
+        const { port, host, ssl, protocols, namespace, apiKey } = action.bsock;
+        socket = bsock.connect(port, host, ssl, protocols, namespace);
 
         socket.on('error', (err) => {
           if (debug)
@@ -35,7 +35,8 @@ export default function bsockMiddleware (options) {
           dispatch({ type: 'SOCKET_ERROR', payload: err });
         });
 
-        socket.on('connect', () => {
+        socket.on('connect', async () => {
+          await socket.call('auth', apiKey);
           if (debug)
             console.log('bsock client connected');
 
@@ -107,9 +108,7 @@ export default function bsockMiddleware (options) {
               'acknowledge property must be a function'
             );
             const ack = await socket.call(type, message, ...args);
-            if (ack) {
-              acknowledge(ack);
-            }
+            acknowledge(ack);
           } else {
             // if there's no acknowledge function then just use the fire method
             socket.fire(type, message, ...args);
