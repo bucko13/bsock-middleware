@@ -3,11 +3,11 @@
 // With help from the following:
 // https://exec64.co.uk/blog/websockets_with_redux/
 // https://github.com/quirinpa/redux-socket
-import 'babel-polyfill';
-import bsock from 'bsock';
-import assert from 'assert';
+require('babel-polyfill');
+const bsock = require('bsock');
+const assert = require('bsert');
 
-export default function bsockMiddleware (options) {
+module.exports = function bsockMiddleware (options) {
   let socket = null;
   const { listeners, debug, disconnectedAction } = options;
   return ({ dispatch }) => next => async (action) => {
